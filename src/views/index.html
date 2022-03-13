@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sudoku</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/index.css">
+</head>
+<body>
+<div id="wrapper">
+    <div class="block">
+        <div class="content">
+            <div class="wrapper">
+                <input type="radio" name="select" id="option-1" checked>
+                <input type="radio" name="select" id="option-2">
+                <input type="radio" name="select" id="option-3">
+                <label for="option-1" class="option option-1">
+                    <div class="dot"></div>
+                    <span>Easy</span>
+                </label>
+                <label for="option-2" class="option option-2">
+                    <div class="dot"></div>
+                    <span>Medium</span>
+                </label>
+                <label for="option-3" class="option option-3">
+                    <div class="dot"></div>
+                    <span>Hard</span>
+                </label>
+            </div>
+        </div>
+        <div class="nav">
+            <div class="back" id="right">Back</div>
+        </div>
+    </div>
+    <div class="block">
+        <div class="header"><img src="../images/logo.png" alt="logo">
+            <h2>Szudoku</h2></div>
+
+        <div class="main-container">
+            <div class="highlight play"><img src="../images/play-icon.svg">Play</div>
+            <div class="options"><img src="../images/settings-icon.svg">Options</div>
+            <div class="credits"><img src="../images/credits-icon.svg">Credits</div>
+        </div>
+    </div>
+    <div class="block">
+        <div class="content credits">
+            <img src="../images/thumbsup.png" class="socialcredit1000">
+            <div class="authors">
+                <h3>Credits</h3>
+                <ul>
+                    <li>Matez_</li>
+                    <li>Fexxy</li>
+                </ul>
+            </div>
+        </div>
+        <div class="nav">
+            <div class="back" id="left">Back</div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="../dist/bundle.js">
+
+</script>
+</html>

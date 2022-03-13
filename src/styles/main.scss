@@ -1,0 +1,114 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800;900&display=swap");
+
+* {
+    --background: #17191d;
+    --accent: #5328c2;
+    margin:0;
+    padding:0;
+}
+
+html{
+    --header-size: 60px;
+    --current-header-size: 60px;
+    overflow-x: hidden;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+    overflow-x: hidden;
+    width: 100%;
+    height: 100%;
+
+    .toolbar {
+        position: fixed;
+        min-height: 30px;
+        max-height: 30px;
+        overflow: hidden;
+        background: #0f111c;
+        width: 100%;
+        color: white;
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+        user-select: none;
+        padding: 0;
+
+        #drag{
+            width: calc(100% - 100px);
+            position: fixed;
+            -webkit-app-region: drag;
+            z-index:999;
+            height: 30px;
+        }
+
+        #title{
+            font-size: 14px;
+            font-weight: 300;
+        }
+
+        .icon {
+            max-height: 70%;
+            margin: 10px;
+        }
+
+        .close, .minimize {
+            img {
+                filter: invert(1);
+            }
+
+            display: grid;
+            place-items: center;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .minimize {
+            margin-left: auto;
+            min-width: 50px;
+            transition: all 0.1s ease-out;
+            img{
+                transform: translateY(calc(-50% + 5px));
+            }
+        }
+
+        .minimize:hover{
+            background: rgba(100, 100, 100, 0.47);
+            transition: all 0.1s ease-out;
+            img{
+                filter: invert(1);
+            }
+        }
+
+        .close {
+            height: 100%;
+            min-width: 50px;
+            transition: all 0.1s ease-out;
+            img{
+                max-height: 65%;
+            }
+        }
+
+        .close:hover{
+            background: #e13535;
+            transition: all 0.1s ease-out;
+            img{
+                filter: invert(1);
+            }
+        }
+    }
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+h1, h2, h3, h4 {
+    margin: 0 0 10px;
+    font-family: "Raleway", sans-serif;
+    font-weight: 700;
+}

@@ -1,0 +1,24 @@
+{
+  "name": "src",
+  "version": "1.0.0",
+  "description": "",
+  "main": "views/index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "window": {
+    "title": "Sudoku",
+    "icon": "images/logo.png",
+    "frame": false,
+    "width": 500,
+    "height": 500,
+    "position": "center",
+    "resizable": false
+      },
+  "webkit": {
+    "plugin": true
+  }
+}
