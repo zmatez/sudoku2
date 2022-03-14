@@ -17,7 +17,7 @@
     "height": 500,
     "position": "center",
     "resizable": false
-      },
+  },
   "webkit": {
     "plugin": true
   }
