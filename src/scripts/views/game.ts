@@ -41,6 +41,7 @@ export namespace Game {
             // this.loader.innerHTML = "<span class=\"loader-spinner\"></span><h1>Loading board...</h1>";
             // this.parent.appendChild(this.loader);
 
+            //generating cells
             for (let x = 0; x < this.size; x++) {
                 for (let y = 0; y < this.size; y++) {
                     let group = this.createGroupCell(x, y);
@@ -65,66 +66,70 @@ export namespace Game {
                 }
             }
 
+            this.fillBoard()
 
-            for (let xg = 0; xg < this.size; xg++) {
-                for (let yg = 0; yg < this.size; yg++) {
-                    let toFill = Math.ceil(rint(this.difficulty.minFill, this.difficulty.maxFill) / 100 * (this.size * this.size));
 
-                    while(true) {
-                        let toFillLocal = toFill;
-                        while (toFillLocal > 0) {
-                            let rx = rint(0, this.size - 1);
-                            let ry = rint(0, this.size - 1);
+            // for (let xg = 0; xg < this.size; xg++) {
+            //     for (let yg = 0; yg < this.size; yg++) {
+            //         let toFill = Math.ceil(rint(this.difficulty.minFill, this.difficulty.maxFill) / 100 * (this.size * this.size));
+            //
+            //         while(true) {
+            //             let toFillLocal = toFill;
+            //             while (toFillLocal > 0) {
+            //                 let rx = rint(0, this.size - 1);
+            //                 let ry = rint(0, this.size - 1);
+            //
+            //                 let xc = xg * this.size + rx;
+            //                 let yc = yg * this.size + ry;
+            //
+            //                 let cell = this.cells[xc][yc];
+            //                 if (cell.value == null) {
+            //                     let available = this.getNumbersFor(xc, yc);
+            //                     if (available.length > 0) {
+            //                         cell.value = available[rint(0, available.length - 1)];
+            //                         cell.update()
+            //                         toFillLocal--;
+            //                     }
+            //                 }
+            //             }
+            //
+            //             let correct = true;
+            //             for (let x = 0; x < this.size; x++) {
+            //                 for (let y = 0; y < this.size; y++) {
+            //                     let xc = xg * this.size + x;
+            //                     let yc = yg * this.size + y;
+            //
+            //                     let available = this.getNumbersFor(xc, yc);
+            //                     if(available.length == 0){
+            //                         correct = false;
+            //                         break
+            //                     }
+            //                 }
+            //
+            //                 if(!correct){
+            //                     break
+            //                 }
+            //             }
+            //
+            //             if(correct){
+            //                 break
+            //             } else {
+            //                 for (let x = 0; x < this.size; x++) {
+            //                     for (let y = 0; y < this.size; y++) {
+            //                         let xc = xg * this.size + x;
+            //                         let yc = yg * this.size + y;
+            //
+            //                         let cell = this.cells[xc][yc];
+            //                         cell.value = null;
+            //                         cell.update()
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
 
-                            let xc = xg * this.size + rx;
-                            let yc = yg * this.size + ry;
 
-                            let cell = this.cells[xc][yc];
-                            if (cell.value == null) {
-                                let available = this.getNumbersFor(xc, yc);
-                                if (available.length > 0) {
-                                    cell.value = available[rint(0, available.length - 1)];
-                                    cell.update()
-                                    toFillLocal--;
-                                }
-                            }
-                        }
-
-                        let correct = true;
-                        for (let x = 0; x < this.size; x++) {
-                            for (let y = 0; y < this.size; y++) {
-                                let xc = xg * this.size + x;
-                                let yc = yg * this.size + y;
-
-                                let available = this.getNumbersFor(xc, yc);
-                                if(available.length == 0){
-                                    correct = false;
-                                    break
-                                }
-                            }
-
-                            if(!correct){
-                                break
-                            }
-                        }
-
-                        if(correct){
-                            break
-                        } else {
-                            for (let x = 0; x < this.size; x++) {
-                                for (let y = 0; y < this.size; y++) {
-                                    let xc = xg * this.size + x;
-                                    let yc = yg * this.size + y;
-
-                                    let cell = this.cells[xc][yc];
-                                    cell.value = null;
-                                    cell.update()
-                                }
-                            }
-                        }
-                    }
-                }
-            }
 
             this.onLoad();
 
@@ -182,6 +187,45 @@ export namespace Game {
             }
 
             return numbers;
+        }
+
+        fillCell(x: number, y: number){
+            let cell = this.getCellAt(x,y);
+            cell.value = null;
+            let numbers = this.getNumbersFor(x,y);
+
+            let prevX = x;
+            let prevY = y - 1;
+            if(prevY < 0){
+                prevY = this.size * this.size - 1;
+                prevX --;
+            }
+
+            if(numbers.length == 0){
+                if(prevX < 0){
+
+                } else {
+                    this.fillCell(prevX, prevY);
+                }
+            } else {
+                cell.value = numbers[rint(0,numbers.length-1)];
+            }
+        }
+
+        fillBoard() {
+            for (let x = 0; x < this.size * this.size; x++) {
+                for (let y = 0; y < this.size * this.size; y++) {
+                    this.fillCell(x,y);
+                }
+            }
+
+            //refresh
+            for (let x = 0; x < this.size * this.size; x++) {
+                for (let y = 0; y < this.size * this.size; y++) {
+                    let cell = this.getCellAt(x,y);
+                    cell.update();
+                }
+            }
         }
     }
 

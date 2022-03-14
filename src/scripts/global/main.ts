@@ -6,7 +6,7 @@ import Difficulty = Game.Difficulty;
 import {ILaunch} from "./launch";
 
 const nwApp = nw.Window.get();
-//nw.Window.get().showDevTools();
+nw.Window.get().showDevTools();
 
 export class SudokuApp {
     private readonly devMode: boolean = true;

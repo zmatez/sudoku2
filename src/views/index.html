@@ -9,24 +9,14 @@
 <body>
 <div id="wrapper">
     <div class="block">
-        <div class="content">
-            <div class="wrapper">
-                <input type="radio" name="select" id="option-1" checked>
-                <input type="radio" name="select" id="option-2">
-                <input type="radio" name="select" id="option-3">
-                <label for="option-1" class="option option-1">
-                    <div class="dot"></div>
-                    <span>Easy</span>
-                </label>
-                <label for="option-2" class="option option-2">
-                    <div class="dot"></div>
-                    <span>Medium</span>
-                </label>
-                <label for="option-3" class="option option-3">
-                    <div class="dot"></div>
-                    <span>Hard</span>
-                </label>
+        <div class="content settings">
+            <div class="title">
+                <img src="../images/game-icon.svg">
+                Select * from difficulty
             </div>
+            <div class="option" id="easy"><div class="dot green"></div>Easy</div>
+            <div class="option selected" id="medium"><div class="dot orange"></div>Medium</div>
+            <div class="option" id="hard"><div class="dot red"></div>Hard</div>
         </div>
         <div class="nav">
             <div class="back" id="right">Back</div>

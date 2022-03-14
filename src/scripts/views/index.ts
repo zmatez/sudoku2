@@ -1,8 +1,11 @@
 import {ILaunch} from "../global/launch";
 import {SudokuApp} from "../global/main";
+import {Game} from "./game";
 const nwApp = nw.Window.get();
 
 export namespace Index {
+    import Difficulty = Game.Difficulty;
+
     export class IndexLaunch implements ILaunch {
         readonly app: SudokuApp;
 
@@ -11,6 +14,7 @@ export namespace Index {
         }
 
         onStart() {
+            let difficulty = Difficulty.MEDIUM;
             let creditsMusic = new Audio('../../music/red_sun_in_the_sky.mp3');
             let playBtn = document.getElementsByClassName('play')[0];
             let optionsBtn = document.getElementsByClassName('options')[0];
@@ -19,14 +23,15 @@ export namespace Index {
             let backL = document.getElementById('left');
             let backR = document.getElementById('right');
 
+            let difficultyBtns = document.getElementsByClassName('option');
 
             playBtn.addEventListener('click',()=>{
                 nw.Window.open("views/game.html", {
                     "title": "Sudoku",
                     "icon": "images/logo.png",
                     "frame": false,
-                    "width": 640,
-                    "height": 480,
+                    "width": 720,
+                    "height": 540,
                     "position": "center",
                     "resizable": false
                 })
@@ -49,6 +54,15 @@ export namespace Index {
             backR.addEventListener('click',()=>{
                 wrapper.style.transform = "translateX(-100%)";
             });
+
+            this.selectDifficulty(difficultyBtns);
+        }
+
+        selectDifficulty(difficulty){
+            if(difficulty.classList !== "selected"){
+                difficulty.classList.add("selected");
+            }
+            //todo to gunwo pickowanie difficulty
         }
 
     }
