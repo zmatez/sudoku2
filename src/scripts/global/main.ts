@@ -26,7 +26,7 @@ export class SudokuApp {
                 break
             }
             case "game": {
-                this.launched = new GameLaunch(this, Difficulty.EASY, 3);
+                this.launched = new GameLaunch(this, Difficulty.DEFAULT, 3);
                 break
             }
         }

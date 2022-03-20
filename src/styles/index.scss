@@ -46,11 +46,11 @@ body {
             img {
                 margin: 0 15px;
             }
-        }
 
-        div:hover {
-            color: white;
-            transition: all 0.1s ease-in;
+            &:hover {
+                color: white;
+                transition: all 0.1s ease-in;
+            }
         }
 
         .highlight {

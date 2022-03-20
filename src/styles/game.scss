@@ -1,6 +1,6 @@
 $accent: #5328c2;
-$title-border: transparentize($accent,0.9);
-$title-background: transparentize($accent,0.9);
+$title-border: transparentize($accent, 0.9);
+$title-background: transparentize($accent, 0.9);
 
 body {
     background-color: var(--background);
@@ -8,21 +8,22 @@ body {
     display: flex;
     flex-flow: column;
     align-items: center;
+    overflow: hidden;
 
-    .title{
+    .title {
         margin: 25px 0;
         padding: 10px 25px;
         border-radius: 5px;
         border: 1px solid $title-border;
         background-color: $title-background;
 
-        h1{
+        h1 {
             font-family: Raleway, sans-serif;
             font-size: 26px;
             font-weight: 700;
         }
 
-        .timer{
+        .timer {
             padding: 2px 6px;
             border-radius: 5px;
             background-color: $title-border;
@@ -35,10 +36,51 @@ body {
 
     .game {
         display: flex;
-        justify-content: center;
+        flex-flow: column;
         align-items: center;
         width: 100%;
         height: 100%;
+        padding: 30px;
+        overflow: hidden;
+
+        .header {
+            display: flex;
+            flex-flow: row;
+            align-items: center;
+            position: relative;
+            width: calc(100% - 10px);
+            padding: 4px 6px;
+            margin-bottom: 10px;
+            gap: 6px;
+
+            .status-display {
+                border-radius: 4px;
+                padding: 4px 8px;
+                font-size: 12px;
+                font-family: "Poppins", sans-serif;
+                color: white;
+                background-color: $accent;
+                text-align: center;
+                cursor: default;
+
+                img {
+                    width: 16px;
+                    height: 16px;
+                }
+
+                &.timer {
+                    min-width: 40px;
+                }
+
+                &.errors {
+                    background-color: #e51045;
+                }
+
+                &.size {
+                    margin-left: auto;
+                }
+            }
+        }
 
         .board {
             display: grid;
@@ -54,7 +96,7 @@ body {
                 box-sizing: border-box;
                 gap: 5px;
                 padding: 4px;
-                background-color: transparentize($accent,0.95);
+                background-color: transparentize($accent, 0.95);
 
                 .cell {
                     color: white;
@@ -62,13 +104,21 @@ body {
                     aspect-ratio: 1;
                     box-sizing: border-box;
                     border-radius: 3px;
-                    background-color: transparentize(white,0.95);
+                    background-color: transparentize(white, 0.94);
 
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     font-weight: 600;
                     font-size: 14px;
+
+                    &.changed {
+                        animation: cell-changed 0.3s ease-in-out forwards;
+                    }
+
+                    &.editable {
+                        background-color: transparentize(white, 0.9);
+                    }
                 }
             }
         }
@@ -83,9 +133,88 @@ body {
 
             h1 {
                 font-weight: 700;
-                font-size: 1;
+                //font-size: 1;
             }
         }
+    }
+}
+
+@keyframes cell-changed {
+    0%{
+        background-color: transparentize(white, 0.95);
+    }
+    15% {
+        background-color: transparentize(lighten($accent,15), 0.2);
+    }
+    100%{
+        background-color: transparentize(white, 0.95);
+    }
+}
+
+.cell-popup {
+    position: fixed;
+    border-radius: 50%;
+    -webkit-transform-origin: 50% 50%;
+    -moz-transform-origin: 50% 50%;
+    transform-origin: 50% 50%;
+    $translation: -30%;
+    transform: translate($translation, $translation);
+
+    .value {
+        position: absolute;
+        top: 0;
+        bottom: 50%;
+        left: 50%;
+        transform-origin: bottom;
+        transform: translate(-50%, 0) rotate(0);
+        animation: popup-appear 0.4s ease-in-out forwards;
+        opacity: 0;
+    }
+
+    &.hide{
+        .value {
+            animation: popup-disappear 0.4s ease-in-out forwards;
+        }
+    }
+
+    &:focus {
+        outline: none;
+        border: none;
+    }
+
+    .center {
+        position: absolute;
+        border-radius: 50%;
+
+    }
+}
+
+@keyframes popup-appear {
+    0%{
+        opacity: 0;
+        transform: translate(-50%, 10%) rotate(0);
+    }
+    25% {
+        opacity: 1;
+        transform: translate(-50%, 0) rotate(0);
+    }
+    100%{
+        opacity: 1;
+        transform: translate(-50%, 0) rotate(var(--rotation));
+    }
+}
+@keyframes popup-disappear {
+    100%{
+        opacity: 0;
+        transform: translate(-50%, 10%) rotate(0);
+    }
+    75% {
+        opacity: 1;
+        transform: translate(-50%, 0) rotate(0);
+    }
+    0%{
+        opacity: 1;
+        transform: translate(-50%, 0) rotate(var(--rotation));
     }
 }
 
@@ -94,6 +223,7 @@ body {
     height: 50px;
     width: 50px;
 }
+
 .loader-spinner:before,
 .loader-spinner:after {
     content: "";
@@ -101,12 +231,14 @@ body {
     height: 20px;
     width: 20px;
 }
+
 .loader-spinner:before {
     animation: box1 1s infinite;
     background-color: #fff;
     box-shadow: 30px 0 0 #ff3d00;
     margin-bottom: 10px;
 }
+
 .loader-spinner:after {
     animation: box2 1s infinite;
     background-color: #ff3d00;
@@ -114,9 +246,15 @@ body {
 }
 
 @keyframes rotate {
-    0% { transform: rotate(0deg) scale(0.8) }
-    50% { transform: rotate(360deg) scale(1.2) }
-    100% { transform: rotate(720deg) scale(0.8) }
+    0% {
+        transform: rotate(0deg) scale(0.8)
+    }
+    50% {
+        transform: rotate(360deg) scale(1.2)
+    }
+    100% {
+        transform: rotate(720deg) scale(0.8)
+    }
 }
 
 @keyframes box1 {

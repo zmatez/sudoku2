@@ -23,7 +23,7 @@ export namespace Index {
             let backL = document.getElementById('left');
             let backR = document.getElementById('right');
 
-            let difficultyBtns = document.getElementsByClassName('option');
+            //let difficultyBtns = document.getElementsByClassName('option');
 
             playBtn.addEventListener('click',()=>{
                 nw.Window.open("views/game.html", {
@@ -31,7 +31,7 @@ export namespace Index {
                     "icon": "images/logo.png",
                     "frame": false,
                     "width": 720,
-                    "height": 540,
+                    "height": 660,
                     "position": "center",
                     "resizable": false
                 })
@@ -55,7 +55,7 @@ export namespace Index {
                 wrapper.style.transform = "translateX(-100%)";
             });
 
-            this.selectDifficulty(difficultyBtns);
+            //this.selectDifficulty(difficultyBtns);
         }
 
         selectDifficulty(difficulty){
