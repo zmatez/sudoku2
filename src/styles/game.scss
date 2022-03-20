@@ -1,4 +1,5 @@
 $accent: #5328c2;
+$accent2: #28c29e;
 $title-border: transparentize($accent, 0.9);
 $title-background: transparentize($accent, 0.9);
 
@@ -84,7 +85,7 @@ body {
 
         .board {
             display: grid;
-            width: 70%;
+            width: min(70vw,calc(95vh - 90px));
             aspect-ratio: 1;
             box-sizing: border-box;
             gap: 12px;
@@ -105,60 +106,179 @@ body {
                     box-sizing: border-box;
                     border-radius: 3px;
                     background-color: transparentize(white, 0.94);
+                    //transition: background-color 0.05s ease-in-out;
 
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     font-weight: 600;
                     font-size: 14px;
+                    user-select: none;
+                    cursor: default;
+                    border: 2px solid transparent;
+
+                    &.wrong-value {
+                        border-color: transparentize(#e51045, 0.7);
+                    }
+                    &.correct-value {
+                        border-color: transparentize(#10e565, 0.7);
+                    }
 
                     &.changed {
                         animation: cell-changed 0.3s ease-in-out forwards;
                     }
 
+                    &.highlight {
+                        background-color: transparentize(darken($accent,15), 0.7);
+
+                        &.hover{
+                            border-color: transparentize($accent2, 0.7);
+
+                            &.changed {
+                                animation: cell-changed-highlight 0.3s ease-in-out forwards;
+
+                            }
+                        }
+                    }
+
                     &.editable {
                         background-color: transparentize(white, 0.9);
+                        cursor: pointer;
+
+                        &.highlight {
+                            background-color: transparentize($accent, 0.7);
+                        }
+
+                        &.hover{
+                            background-color: transparentize($accent2, 0.3);
+                            border-color: transparent;
+                        }
                     }
                 }
             }
         }
 
-        .loader {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-flow: column;
-            justify-content: center;
-            align-items: center;
+        .button {
+            position: absolute;
+            right: 4px;
+            bottom: 4px;
 
-            h1 {
-                font-weight: 700;
-                //font-size: 1;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-family: "Poppins", sans-serif;
+            background-color: transparentize($accent,0.75);
+            text-align: center;
+            user-select: none;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out, transform 0.15s ease-in-out;
+            color: transparentize(white,0.4);
+            transform: scale(1);
+
+            &:hover{
+                background-color: $accent;
+                color: white;
+            }
+
+            &.btn-close {
+                background-color: #1bbb7a;
+                color: white;
+
+                &:hover{
+                    background-color: darken(#1bbb7a,10);
+                }
+            }
+
+            &:active{
+                transform: scale(0.95);
             }
         }
+
+        .message-popup {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: -10%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+
+            .info {
+                border-radius: 4px;
+                padding: 4px 8px;
+                font-size: 12px;
+                font-family: "Poppins", sans-serif;
+                color: white;
+                background-color: $accent;
+                text-align: center;
+                cursor: default;
+            }
+
+            &.success {
+                .info {
+                    background-color: transparentize(#10e565, 0.7);
+                }
+            }
+
+            &.fail {
+                .info {
+                    background-color: transparentize(#e51045, 0.7);
+                }
+            }
+
+            animation: message-popup 5s ease-in-out forwards;
+        }
+    }
+}
+
+@keyframes message-popup {
+    0% {
+        bottom: -60px;
+        transform: scale(0);
+    }
+    15% {
+        bottom: 5px;
+        transform: scale(1);
+    }
+
+    85% {
+        bottom: 5px;
+        transform: scale(1);
+    }
+    100% {
+        bottom: -60px;
+        transform: scale(0);
     }
 }
 
 @keyframes cell-changed {
     0%{
-        background-color: transparentize(white, 0.95);
+        background-color: transparentize(white, 0.94);
     }
     15% {
         background-color: transparentize(lighten($accent,15), 0.2);
     }
     100%{
-        background-color: transparentize(white, 0.95);
+        background-color: transparentize(white, 0.94);
+    }
+}
+
+@keyframes cell-changed-highlight {
+    0%{
+        background-color: transparentize($accent2, 0.3);
+    }
+    15% {
+        background-color: white;
+    }
+    100%{
+        background-color: transparentize($accent2, 0.3);
     }
 }
 
 .cell-popup {
     position: fixed;
     border-radius: 50%;
-    -webkit-transform-origin: 50% 50%;
-    -moz-transform-origin: 50% 50%;
-    transform-origin: 50% 50%;
-    $translation: -30%;
-    transform: translate($translation, $translation);
 
     .value {
         position: absolute;

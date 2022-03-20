@@ -7,12 +7,16 @@ export namespace Game {
     import rfloat = Utils.rfloat;
     import ColorMixer = Utils.ColorMixer;
 
+    const win = nw.Window.get();
+
     export class GameLaunch extends ILaunch {
-        private readonly size: number;
-        private readonly difficulty: Difficulty;
-        private readonly emptyCount: number;
-        private readonly cellSize: number;
         private readonly parent: HTMLDivElement;
+
+        private size: number;
+        private difficulty: Difficulty;
+        private emptyCount: number;
+        private cellSize: number;
+
         private header: HTMLDivElement;
         private board: HTMLDivElement;
         private groups: CellGroup[][] = [];
@@ -22,17 +26,67 @@ export namespace Game {
         private errorsElement: HTMLDivElement;
         private sizeElement: HTMLDivElement;
         private difficultyElement: HTMLDivElement;
+        private resized: boolean = false;
+        public frozen: boolean = false;
+        public won: boolean = false;
 
-        constructor(app: SudokuApp, difficulty: Difficulty, size: number) {
+        public duringSelection: Cell;
+        private highlightData: { cell: Cell, x: number, y: number } = {
+            cell: null,
+            x: -1,
+            y: -1
+        };
+
+        private button: HTMLDivElement;
+
+        constructor(app: SudokuApp) {
             super(app);
-            this.size = size;
-            this.difficulty = difficulty;
-            this.emptyCount = rfloat(this.difficulty.minFill, this.difficulty.maxFill) / 100 * (size * size * size * size);
-            this.cellSize = (Math.min(document.body.offsetWidth, document.body.offsetHeight) * 0.8) / (this.size * this.size);
             this.parent = <HTMLDivElement>document.getElementsByClassName('game')[0];
         }
 
-        onStart() {
+        needsDataBeforeStart(): boolean {
+            return true;
+        }
+
+        onStart(data: URLSearchParams) {
+
+            //data
+
+            this.size = parseInt(data.get("size"));
+            this.difficulty = Difficulty.values[parseInt(data.get("difficulty"))];
+            this.emptyCount = (this.size * this.size * this.size * this.size) - rfloat(this.difficulty.minFill, this.difficulty.maxFill) / 100 * (this.size * this.size * this.size * this.size);
+            this.cellSize = (Math.min(document.body.offsetWidth, document.body.offsetHeight) * 0.8) / (this.size * this.size);
+
+            //! ---
+
+            //events
+
+            win.on('resize', (w, h) => {
+                this.resized = true;
+            })
+            win.on('maximize', () => {
+                this.resized = true;
+            })
+            win.on('minimize', () => {
+                this.resized = true;
+            })
+            win.on('restore', () => {
+                this.resized = true;
+            })
+            setInterval(() => {
+                if (this.resized) {
+                    this.resized = false;
+                    this.onResize();
+                }
+            }, 100);
+
+            document.body.addEventListener('keydown', (e) => {
+                this.onKey(e)
+            })
+            //! ---
+
+            //components
+
             this.header = document.createElement('div');
             this.header.classList.add("header");
 
@@ -53,6 +107,28 @@ export namespace Game {
             this.difficultyElement.innerHTML = this.difficulty.name;
             this.difficultyElement.style.backgroundColor = this.difficulty.color;
             this.header.appendChild(this.difficultyElement);
+
+            this.button = document.createElement('div');
+            this.button.classList.add("button", "btn-give-up");
+            this.button.innerHTML = "Give up";
+            this.button.addEventListener('click', () => {
+                if (this.button.classList.contains("btn-give-up")) {
+                    //give up
+                    this.giveUp();
+                } else {
+                    //close
+                    nw.Window.open("views/index.html", {
+                        "title": "Sudoku",
+                        "icon": "images/logo.png",
+                        "frame": false,
+                        "width": 500,
+                        "height": 500,
+                        "position": "center",
+                        "resizable": false
+                    })
+                    window.close();
+                }
+            })
 
             this.generate();
         }
@@ -96,7 +172,15 @@ export namespace Game {
                 }
             }
 
-            this.fillBoard();
+            let generated = false;
+            while(!generated){
+                try {
+                    this.fillBoard();
+                }catch (e){
+                    continue
+                }
+                generated = true;
+            }
             this.refresh();
 
             this.onLoad();
@@ -106,13 +190,33 @@ export namespace Game {
             this.parent.innerHTML = "";
             this.parent.appendChild(this.header);
             this.parent.appendChild(this.board);
+            this.parent.appendChild(this.button);
 
             this.onChange();
+            this.onResize()
 
             setInterval(() => {
-                this.timer++;
-                this.tick();
+                if (!this.frozen) {
+                    this.timer++;
+                    this.tick();
+                }
             }, 1000)
+
+            win.focus();
+            document.body.focus();
+        }
+
+        onResize() {
+            if (this.cells) {
+                for (let x = 0; x < this.size * this.size; x++) {
+                    for (let y = 0; y < this.size * this.size; y++) {
+                        let cell = this.cells[x][y];
+                        if (cell) {
+                            cell.resize()
+                        }
+                    }
+                }
+            }
         }
 
         createGroupCell(x: number, y: number): CellGroup {
@@ -165,6 +269,14 @@ export namespace Game {
         }
 
         public fillBoard() {
+            //safety reset
+            for (let x = 0; x < this.size * this.size; x++) {
+                for (let y = 0; y < this.size * this.size; y++) {
+                    let cell = this.cells[x][y];
+                    cell.value = null;
+                }
+            }
+
             for (let x = 0; x < this.size * this.size; x++) {
                 for (let y = 0; y < this.size * this.size; y++) {
                     this.fillAt(x, y);
@@ -194,6 +306,7 @@ export namespace Game {
                 for (let y = 0; y < this.size * this.size; y++) {
                     let cell = this.cells[x][y];
                     cell.saveState();
+                    cell.update()
                 }
             }
         }
@@ -216,6 +329,7 @@ export namespace Game {
 
             if (cell.availableNumbers.length > 0) {
                 cell.value = cell.availableNumbers[rint(0, cell.availableNumbers.length - 1)];
+                cell.validNumber = cell.value;
                 if (cell.availableNumbers.includes(cell.value)) {
                     cell.availableNumbers.splice(cell.availableNumbers.indexOf(cell.value), 1);
                 }
@@ -268,10 +382,10 @@ export namespace Game {
             for (let x = 0; x < this.size * this.size; x++) {
                 for (let y = 0; y < this.size * this.size; y++) {
                     let cell = this.cells[x][y];
-                    if(cell.editable){
+                    if (cell.editable) {
                         let oldValue = cell.value;
                         cell.value = null;
-                        if(oldValue == null || !this.getNumbersFor(x,y).includes(oldValue)){
+                        if (oldValue == null || !this.getNumbersFor(x, y).includes(oldValue)) {
                             errors++;
                         }
 
@@ -279,6 +393,7 @@ export namespace Game {
                     }
                 }
             }
+
             return errors;
         }
 
@@ -308,6 +423,232 @@ export namespace Game {
         public onChange(cell?: Cell) {
             let errors = this.findErrors();
             this.errorsElement.innerHTML = errors + " errors";
+
+            if (errors == 0 && !this.won && !this.frozen) {
+                this.onWin();
+            }
+        }
+
+        public onWin() {
+            this.frozen = true;
+            this.won = true;
+            this.parent.classList.add("won");
+            this.makeBtnClose();
+            this.clearHighlight();
+            this.announce("You win!", "success");
+            document.body.focus();
+
+            for (let x = 0; x < this.size * this.size; x++) {
+                for (let y = 0; y < this.size * this.size; y++) {
+                    let cell = this.cells[x][y];
+                    if (cell.editable) {
+                        cell.element.classList.add("correct-value");
+                    }
+                }
+            }
+        }
+
+        public highlight(cell: Cell) {
+            if (this.frozen) {
+                return
+            }
+            if (this.highlightData.cell == cell) {
+                return
+            }
+            if (this.duringSelection && cell != this.duringSelection) {
+                this.highlight(this.duringSelection);
+                return;
+            }
+
+            this.clearHighlight();
+
+            let x = cell.x + (cell.group.x * this.size);
+            let y = cell.y + (cell.group.y * this.size);
+
+            for (let i = 0; i < this.size * this.size; i++) {
+                let c = this.cells[i][y];
+                c.highlight()
+            }
+            for (let i = 0; i < this.size * this.size; i++) {
+                let c = this.cells[x][i];
+                c.highlight()
+            }
+            cell.group.cells.forEach(cX => {
+                cX.forEach(cY => {
+                    cY.highlight();
+                })
+            });
+
+            cell.hover();
+            this.highlightData = {
+                cell: cell,
+                x: x,
+                y: y
+            }
+        }
+
+        private clearHighlight() {
+            for (let x = 0; x < this.size * this.size; x++) {
+                for (let y = 0; y < this.size * this.size; y++) {
+                    let cell = this.cells[x][y];
+                    cell.removeHighlight();
+                }
+            }
+        }
+
+        private onKey(e: KeyboardEvent) {
+            if (e.key == "ArrowLeft" || e.key == "ArrowRight" || e.key == "ArrowUp" || e.key == "ArrowDown" || e.key == "Enter") {
+                if (!this.highlightData.cell) {
+                    this.highlightData = {
+                        cell: this.cells[0][0],
+                        x: 0,
+                        y: 0
+                    }
+                } else {
+                    let max = this.size * this.size;
+                    if (e.key == "ArrowUp") {
+                        let nextX = this.highlightData.x - 1;
+                        if (nextX >= 0 && nextX < max) {
+                            let cell = this.cells[nextX][this.highlightData.y];
+                            this.highlight(cell);
+                        }
+                    } else if (e.key == "ArrowDown") {
+                        let nextX = this.highlightData.x + 1;
+                        if (nextX >= 0 && nextX < max) {
+                            let cell = this.cells[nextX][this.highlightData.y];
+                            this.highlight(cell);
+                        }
+                    } else if (e.key == "ArrowRight") {
+                        let nextY = this.highlightData.y + 1;
+                        if (nextY >= 0 && nextY < max) {
+                            let cell = this.cells[this.highlightData.x][nextY];
+                            this.highlight(cell);
+                        }
+                    } else if (e.key == "ArrowLeft") {
+                        let nextY = this.highlightData.y - 1;
+                        if (nextY >= 0 && nextY < max) {
+                            let cell = this.cells[this.highlightData.x][nextY];
+                            this.highlight(cell);
+                        }
+                    } else if (e.key == "Enter") {
+                        if (!this.duringSelection) {
+                            this.highlightData.cell.openMenu()
+                        }
+                    }
+                }
+            }
+
+            if (e.key == "Escape") {
+                this.giveUp();
+            }
+        }
+
+        public giveUp() {
+            if (this.frozen) {
+                return
+            }
+            this.frozen = true;
+
+            this.makeBtnClose()
+            this.parent.classList.add("give-up");
+            this.clearHighlight();
+            this.announce("You lose!", "fail");
+            document.body.focus();
+
+            let oldValues: number[][] = [];
+            const add = (x: number, y: number) => {
+                if (!oldValues[x]) {
+                    oldValues[x] = [];
+                }
+                let cell = this.cells[x][y];
+                if (cell.editable) {
+                    oldValues[x][y] = cell.value;
+                    cell.value = null;
+                }
+            }
+
+            for (let x = 0; x < this.size * this.size; x++) {
+                for (let y = 0; y < this.size * this.size; y++) {
+                    add(x, y);
+                }
+            }
+
+            let x: number = -1;
+            let y: number = -1;
+            const next = () => {
+                if (x == -1 && y == -1) {
+                    x = 0;
+                    y = 0;
+                    if (this.cells[x][y].editable) {
+                        return true
+                    }
+                }
+
+                while (true) {
+                    y++;
+                    if (y < this.size * this.size) {
+                        //good
+                        if (this.cells[x][y].editable) {
+                            break
+                        } else {
+                            continue
+                        }
+                    } else {
+                        y = 0;
+                        x++;
+
+                        if (x < this.size * this.size) {
+                            //good
+                            if (this.cells[x][y].editable) {
+                                break
+                            } else {
+                                continue
+                            }
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            let interval = null;
+            interval = setInterval(() => {
+                if (next()) {
+                    let cell = this.cells[x][y];
+                    let valid = cell.validNumber;
+                    let oldValue = oldValues[x][y];
+                    if (valid != oldValue) {
+                        cell.element.classList.add("wrong-value");
+                        cell.select(valid)
+                    } else {
+                        cell.element.classList.add("correct-value");
+                        cell.value = valid;
+                        cell.update();
+                        this.onChange(cell);
+                    }
+                } else {
+                    clearInterval(interval);
+                }
+            }, 150)
+
+        }
+
+        private makeBtnClose() {
+            this.button.classList.remove("btn-give-up");
+            this.button.classList.add("btn-close");
+            this.button.innerHTML = "Continue";
+        }
+
+        announce(text: string, clazz: string) {
+            let box = document.createElement('div');
+            box.classList.add("message-popup", clazz);
+            box.innerHTML = "<div class='info'>" + text + "</div>";
+            this.parent.appendChild(box);
+            setTimeout(() => {
+                box.remove();
+            }, 5000)
         }
     }
 
@@ -347,6 +688,9 @@ export namespace Game {
         public value: number | null;
         public editable: boolean;
         public availableNumbers: number[] = [];
+        public validNumber: number = null;
+        private menu: CellPopup;
+        public fontSize: number = 14;
 
         constructor(size: number, x: number, y: number, group: CellGroup, value: number = null) {
             this.size = size;
@@ -361,12 +705,11 @@ export namespace Game {
                 this.element.innerHTML = value + "";
             }
 
-            this.element.addEventListener('click', () => {
-                let available = this.group.parent.getNumbersFor((this.group.x * this.size) + this.x, (this.group.y * this.size) + this.y);
-                console.log(available)
-            })
-
             this.group.element.appendChild(this.element);
+
+            this.element.addEventListener('mouseenter', () => {
+                this.group.parent.highlight(this);
+            })
         }
 
         saveState() {
@@ -374,8 +717,7 @@ export namespace Game {
             if (this.editable) {
                 this.element.classList.add("editable");
                 this.element.addEventListener('click', () => {
-                    let popup = new CellPopup(this);
-                    popup.show()
+                    this.openMenu()
                 })
             }
         }
@@ -386,6 +728,10 @@ export namespace Game {
             } else {
                 this.element.innerHTML = "";
             }
+
+            let cellSize = this.element.offsetWidth;
+            this.fontSize = cellSize / 4;
+            this.element.style.fontSize = this.fontSize + "px";
         }
 
         select(value: number) {
@@ -399,6 +745,45 @@ export namespace Game {
             setTimeout(() => {
                 this.element.classList.remove("changed");
             }, 300)
+        }
+
+        openMenu() {
+            if (this.group.parent.frozen) {
+                return
+            }
+            if (this.editable) {
+                this.group.parent.highlight(this);
+                this.group.parent.duringSelection = this;
+                this.menu = new CellPopup(this);
+                this.menu.show();
+                this.menu.onHide = () => {
+                    setTimeout(() => {
+                        if (this.group.parent.duringSelection == this) {
+                            this.group.parent.duringSelection = null;
+                        }
+                    }, 100)
+                }
+            }
+        }
+
+        resize() {
+            this.update();
+            if (this.menu) {
+                this.menu.hide()
+            }
+        }
+
+        highlight() {
+            this.element.classList.add("highlight");
+        }
+
+        hover() {
+            this.element.classList.add("hover");
+        }
+
+        removeHighlight() {
+            this.element.classList.remove("highlight");
+            this.element.classList.remove("hover");
         }
     }
 
@@ -414,6 +799,9 @@ export namespace Game {
         private startTime: Date;
         private hideTime: Date;
 
+        public onHide: () => void = () => {
+        };
+
         constructor(cell: Game.Cell) {
             this.cell = cell;
         }
@@ -423,17 +811,28 @@ export namespace Game {
             this.element = document.createElement('div');
             this.element.classList.add("cell-popup");
             this.element.tabIndex = -1;
-            let cellSize = Math.max(this.cell.element.offsetWidth,45);
+            let cellSize = Math.min(this.cell.element.offsetWidth, 80);
 
-            let elSize = (cellSize * (this.cell.size / 1.2));
+            let elSize = (cellSize * (3 / 1.2));
             this.element.style.width = elSize + "px";
             this.element.style.height = elSize + "px";
 
             let total = this.cell.size * this.cell.size + 1;
-
             let center = document.createElement('div');
             center.classList.add("center");
             this.element.appendChild(center);
+
+            let mouseX = -1;
+            let mouseY = -1;
+
+            this.element.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            this.element.addEventListener('mouseleave', (e) => {
+                mouseX = -1;
+                mouseY = -1;
+            })
 
             for (let i = 0; i < total; i++) {
                 let val = document.createElement('canvas');
@@ -441,7 +840,7 @@ export namespace Game {
 
                 this.values[i] = val;
 
-                val.addEventListener('mousemove', () => {
+                const select = () => {
                     this.selectedValue = i;
                     if (this.selected) {
                         this.selected.classList.remove("reselected");
@@ -450,10 +849,36 @@ export namespace Game {
                     if (!this.selected.classList.contains("selected")) {
                         this.selected.classList.add("reselected");
                     }
-                })
+                }
 
-                // val.style.left = (50 - 35 * Math.cos(-0.5 * Math.PI - 2 * (1 / total) * i * Math.PI)).toFixed(4) + "%";
-                // val.style.top = (50 + 35 * Math.sin(-0.5 * Math.PI - 2 * (1 / total) * i * Math.PI)).toFixed(4) + "%";
+                const findHover = () => {
+                    if (mouseX != -1 && mouseY != -1) {
+                        let max = (length) / 2;
+                        let min = {
+                            dist: -1,
+                            element: null
+                        }
+                        for (let element of document.elementsFromPoint(mouseX, mouseY)) {
+                            if (element.classList.contains("value")) {
+                                let centerX = element.getBoundingClientRect().left + element.getBoundingClientRect().width / 2;
+                                let centerY = element.getBoundingClientRect().top + element.getBoundingClientRect().height / 2;
+
+                                let dist = Math.sqrt(Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2));
+                                if (min.element == null || min.dist > dist) {
+                                    if(dist < max) {
+                                        min = {
+                                            dist: dist,
+                                            element: element
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        return min.element == val;
+                    }
+                    return false;
+                }
+
                 val.style.setProperty("--rotation", (i / total * 360) + "deg");
 
                 if ((i == 0 && this.cell.value == null) || i == this.cell.value) {
@@ -469,12 +894,19 @@ export namespace Game {
                 let upscale = 2;
 
                 val.height = length * upscale;
-                val.width = length * upscale;
-                val.style.width = length + "px";
+                val.width = elSize * upscale;
+                val.style.width = elSize + "px";
                 val.style.height = length + "px";
 
                 let ctx = val.getContext("2d");
+
+                //!----------------------------------------------------------------------
                 this.animationEntries.push((tick, hideTick) => {
+                    let hover = findHover();
+                    if (hover) {
+                        select()
+                    }
+
                     ctx.clearRect(0, 0, val.width, val.height);
 
                     let colorR = 37;
@@ -496,47 +928,70 @@ export namespace Game {
                             colorB = mix.b;
                         }
                     }
-                    ctx.fillStyle = "rgba(" + colorR + "," + colorG + ", " + colorB + ",0.8)";
-                    ctx.strokeStyle = "rgba(83,40,194,0.5)";
+                    ctx.fillStyle = "rgb(" + colorR + "," + colorG + ", " + colorB + ")";
+                    ctx.strokeStyle = "red";
                     ctx.lineCap = "round";
                     ctx.lineWidth = 2;
 
-                    const drawAngledLine = (x, y, startLength, length, angle) => {
-                        let radians = angle / 180 * Math.PI;
-                        let startX = x + startLength * Math.cos(radians);
-                        let startY = y - startLength * Math.sin(radians);
-                        let endX = x + length * Math.cos(radians);
-                        let endY = y - length * Math.sin(radians);
+                    ctx.imageSmoothingEnabled = true;
 
-                        return {
-                            sx: startX,
-                            sy: startY,
-                            ex: endX,
-                            ey: endY
+                    let center = {
+                        x: length * upscale,
+                        y: length * upscale
+                    }
+
+                    const fillWedge = (cx, cy, radius, startAngle, endAngle, fillcolor, stroke = false) => {
+                        ctx.beginPath();
+                        ctx.moveTo(cx, cy);
+                        ctx.arc(cx, cy, radius, startAngle, endAngle);
+                        ctx.closePath();
+                        if(stroke){
+                            ctx.lineWidth = 1;
+                            ctx.strokeStyle = fillcolor;
+                            ctx.stroke();
+                        } else {
+                            ctx.fillStyle = fillcolor;
+                            ctx.fill();
                         }
                     }
 
-                    ctx.imageSmoothingEnabled = true;
-                    ctx.beginPath();
+                    const degToAngle = (deg) => {
+                        let start=-Math.PI/2;
+                        let fullCircle=Math.PI*2;
+                        return(start+fullCircle*(deg/360));
+                    }
 
-                    let pos1 = drawAngledLine(length / 2, length, cellSize / 2, length, (90 + -(deg / 2)) % 360);
-                    let pos2 = drawAngledLine(length / 2, length, cellSize / 2, length, (90 + (deg / 2)) % 360);
+                    ctx.save();
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.globalCompositeOperation = "source-out";
+                    {
+                        //lower circle
+                        let cx = center.x;
+                        let cy = center.y;
+                        let radius = length * upscale / 3;
+                        let startAngle = -((deg + 1) / 2) % 360;
+                        let endAngle = ((deg + 1) / 2) % 360;
 
-                    ctx.moveTo(pos1.sx * upscale, pos1.sy * upscale);
-                    ctx.lineTo(pos1.ex * upscale, pos1.ey * upscale);
-                    ctx.arcTo(length / 2 * upscale, 0, pos2.ex * upscale, pos2.ey * upscale, 90);
-                    ctx.lineTo(pos2.ex * upscale, pos2.ey * upscale);
-                    ctx.lineTo(pos2.sx * upscale, pos2.sy * upscale);
-                    ctx.arcTo(length / 2 * upscale, (length - cellSize / 2) * upscale, pos1.sx * upscale, pos1.sy * upscale, 45);
+                        fillWedge(cx, cy, radius, degToAngle(startAngle), degToAngle(endAngle), ctx.fillStyle);
+                    }
+                    ctx.globalAlpha = 0.8;
+                    {
+                        //upper circle
+                        let cx = center.x;
+                        let cy = center.y;
+                        let radius = length * upscale;
+                        let startAngle = -(deg / 2) % 360;
+                        let endAngle = (deg / 2) % 360;
 
-                    ctx.closePath();
-                    ctx.fill();
+                        fillWedge(cx, cy, radius, degToAngle(startAngle), degToAngle(endAngle), ctx.fillStyle);
+                    }
+                    ctx.restore();
 
                     if (i != 0) {
                         ctx.save();
-                        ctx.translate(length / 2 * upscale, length / 3 * upscale);
+                        ctx.translate(length * upscale, length / 3 * upscale);
                         ctx.rotate(-(i / total * 360) / 180 * Math.PI);
-                        ctx.font = "600 " + (14 * upscale) + 'px Poppins';
+                        ctx.font = "600 " + ((this.cell.fontSize) * upscale) + 'px Poppins';
                         ctx.textAlign = "center";
                         ctx.fillStyle = "white";
                         ctx.fillText((i) + "", 0, 5 * upscale);
@@ -548,15 +1003,18 @@ export namespace Game {
             }
 
             let rect = this.cell.element.getBoundingClientRect();
-            this.element.style.top = rect.top + "px";
-            this.element.style.left = rect.left + "px";
+            this.element.style.top = (rect.top) + "px";
+            this.element.style.left = (rect.left) + "px";
 
             this.element.addEventListener('blur', () => {
-                if (this.selectedValue == 0 && this.cell.value != null) {
-                    this.cell.select(null);
-                    if (this.originallySelected) {
-                        this.originallySelected.classList.remove("selected");
-                        this.selected.classList.add("selected");
+                this.onHide();
+                if (this.selectedValue == 0) {
+                    if (this.cell.value != null) {
+                        this.cell.select(null);
+                        if (this.originallySelected) {
+                            this.originallySelected.classList.remove("selected");
+                            this.selected.classList.add("selected");
+                        }
                     }
                 } else if (this.selectedValue != this.cell.value) {
                     this.cell.select(this.selectedValue);
@@ -610,6 +1068,10 @@ export namespace Game {
             document.body.appendChild(this.element);
             this.element.focus();
 
+
+            this.element.style.top = (rect.top + (rect.height / 2) - (this.element.getBoundingClientRect().height / 2)) + "px";
+            this.element.style.left = (rect.left + (rect.height / 2) - (this.element.getBoundingClientRect().width / 2)) + "px";
+
             requestAnimationFrame(() => this.animate());
         }
 
@@ -630,6 +1092,10 @@ export namespace Game {
             let ticks = new Date().getTime() - this.startTime.getTime();
 
             this.animationEntries.forEach((f) => f(ticks, hideTicks));
+        }
+
+        hide() {
+            this.element.blur()
         }
     }
 

@@ -7,5 +7,5 @@ export abstract class ILaunch {
         this.app = app;
     }
 
-    abstract onStart();
+    abstract onStart(data?: any);
 }

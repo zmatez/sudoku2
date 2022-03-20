@@ -12,6 +12,7 @@ export class SudokuApp {
     private readonly devMode: boolean = true;
     private readonly page: string;
     private readonly launched: ILaunch;
+    private theme: "LIGHT" | "DARK" = "DARK";
 
     constructor() {
         if (this.devMode) {
@@ -26,7 +27,7 @@ export class SudokuApp {
                 break
             }
             case "game": {
-                this.launched = new GameLaunch(this, Difficulty.DEFAULT, 3);
+                this.launched = new GameLaunch(this);
                 break
             }
         }
@@ -36,12 +37,11 @@ export class SudokuApp {
 
     defaults() {
         this.createToolbar();
-
     }
 
     onStart() {
         if (this.launched) {
-            this.launched.onStart()
+            this.launched.onStart(new URLSearchParams(window.location.search));
         } else {
             console.error("Unable to launch controller for page: " + this.page)
         }
@@ -90,6 +90,9 @@ export class SudokuApp {
         document.body.append(wrapper);
     }
 
+    applyTheme(){
+
+    }
 }
 
 const app = new SudokuApp();

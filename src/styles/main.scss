@@ -5,11 +5,12 @@
     --background: #17191d;
     --accent: #5328c2;
     --btn-background: #1f2228;
-    margin:0;
-    padding:0;
+    --toolbar-height: 25px;
+    margin: 0;
+    padding: 0;
 }
 
-html{
+html {
     --header-size: 60px;
     --current-header-size: 60px;
     overflow-x: hidden;
@@ -26,8 +27,8 @@ html, body {
 
     .toolbar {
         position: fixed;
-        min-height: 30px;
-        max-height: 30px;
+        min-height: var(--toolbar-height);
+        max-height: var(--toolbar-height);
         overflow: hidden;
         background: #0f111c;
         width: 100%;
@@ -38,17 +39,17 @@ html, body {
         user-select: none;
         padding: 0;
 
-        #drag{
+        #drag {
             width: calc(100% - 100px);
             position: fixed;
             -webkit-app-region: drag;
-            z-index:999;
+            z-index: 999;
             height: 30px;
         }
 
-        #title{
-            font-size: 14px;
-            font-weight: 300;
+        #title {
+            font-size: 13px;
+            font-weight: 500;
         }
 
         .icon {
@@ -63,40 +64,45 @@ html, body {
 
             display: grid;
             place-items: center;
-            height: 30px;
+            height: var(--toolbar-height);
             box-sizing: border-box;
+            min-width: 40px;
+            aspect-ratio: 1;
         }
 
         .minimize {
             margin-left: auto;
-            min-width: 50px;
             transition: all 0.1s ease-out;
-            img{
+
+            img {
                 transform: translateY(calc(-50% + 5px));
             }
-        }
 
-        .minimize:hover{
-            background: rgba(100, 100, 100, 0.47);
-            transition: all 0.1s ease-out;
-            img{
-                filter: invert(1);
+            &:hover {
+                background: rgba(100, 100, 100, 0.47);
+                transition: all 0.1s ease-out;
+
+                img {
+                    filter: invert(1);
+                }
             }
         }
+
 
         .close {
-            min-width: 50px;
             transition: all 0.1s ease-out;
-            img{
+
+            img {
                 max-height: 65%;
             }
-        }
 
-        .close:hover{
-            background: #e13535;
-            transition: all 0.1s ease-out;
-            img{
-                filter: invert(1);
+            &:hover {
+                background: #e13535;
+                transition: all 0.1s ease-out;
+
+                img {
+                    filter: invert(1);
+                }
             }
         }
     }
