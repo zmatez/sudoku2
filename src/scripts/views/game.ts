@@ -1,11 +1,13 @@
 import {ILaunch} from "../global/launch";
 import {SudokuApp} from "../global/main";
 import {Utils} from "../global/utils";
+import {Animator} from "../global/animator";
 
 export namespace Game {
     import rint = Utils.rint;
     import rfloat = Utils.rfloat;
     import ColorMixer = Utils.ColorMixer;
+    import BackgroundAnimation = Animator.BackgroundAnimation;
 
     const win = nw.Window.get();
 
@@ -29,6 +31,8 @@ export namespace Game {
         private resized: boolean = false;
         public frozen: boolean = false;
         public won: boolean = false;
+
+        private animation: BackgroundAnimation;
 
         public duringSelection: Cell;
         private highlightData: { cell: Cell, x: number, y: number } = {
@@ -54,7 +58,9 @@ export namespace Game {
 
             this.size = parseInt(data.get("size"));
             this.difficulty = Difficulty.values[parseInt(data.get("difficulty"))];
-            this.emptyCount = (this.size * this.size * this.size * this.size) - rfloat(this.difficulty.minFill, this.difficulty.maxFill) / 100 * (this.size * this.size * this.size * this.size);
+            if(!this.difficulty.fieldsMatchOnce) {
+                this.emptyCount = (this.size * this.size * this.size * this.size) - rfloat(this.difficulty.minFill, this.difficulty.maxFill) / 100 * (this.size * this.size * this.size * this.size);
+            }
             this.cellSize = (Math.min(document.body.offsetWidth, document.body.offsetHeight) * 0.8) / (this.size * this.size);
 
             //! ---
@@ -142,6 +148,7 @@ export namespace Game {
             this.board.style.gridTemplateRows = "repeat(" + this.size + ", 1fr)";
             this.board.style.gridTemplateColumns = "repeat(" + this.size + ", 1fr)";
 
+
             // this.loader = document.createElement('div');
             // this.loader.classList.add("loader");
             // this.loader.innerHTML = "<span class=\"loader-spinner\"></span><h1>Loading board...</h1>";
@@ -192,6 +199,13 @@ export namespace Game {
             this.parent.appendChild(this.board);
             this.parent.appendChild(this.button);
 
+            if(this.animation){
+                this.animation.stop()
+            }
+
+            this.animation = new BackgroundAnimation(this.parent);
+            this.animation.start();
+
             this.onChange();
             this.onResize()
 
@@ -216,6 +230,10 @@ export namespace Game {
                         }
                     }
                 }
+            }
+
+            if(this.animation){
+                this.animation = this.animation.restart();
             }
         }
 
@@ -1105,7 +1123,7 @@ export namespace Game {
         public static MEDIUM: Difficulty = new Difficulty("medium", 20, 40, "#de7225");
         public static HARD: Difficulty = new Difficulty("hard", 10, 20, "#cb374d");
 
-        public static readonly values: Difficulty[] = [Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD];
+        public static readonly values: Difficulty[] = [Difficulty.DEFAULT, Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD];
 
         public name: string;
         public minFill: number;

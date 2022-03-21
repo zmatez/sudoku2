@@ -11,13 +11,14 @@
   },
   "dependencies": {
     "ajv": "^8.10.0",
-    "typescript": "^4.5.5"
+    "typescript": "^4.5.5",
+    "worley-noise": "^2.0.1"
   },
   "devDependencies": {
     "@types/nw.gui": "^0.0.21",
     "@types/nw.js": "^0.13.14",
-    "nw": "^0.61.0-sdk",
     "fork-ts-checker-webpack-plugin": "^7.2.1",
+    "nw": "^0.61.0-sdk",
     "nw-builder": "^3.5.7",
     "ts-loader": "^9.2.7",
     "webpack": "^5.70.0",

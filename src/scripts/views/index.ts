@@ -9,7 +9,7 @@ export namespace Index {
 
     export class IndexLaunch implements ILaunch {
         public readonly app: SudokuApp;
-        private difficulty = Difficulty.MEDIUM;
+        private difficulty = Difficulty.DEFAULT;
         private boardSize = 3;
 
         constructor(app: SudokuApp) {
@@ -25,7 +25,9 @@ export namespace Index {
             let backL = document.getElementById('left');
             let backR = document.getElementById('right');
 
-            //let difficultyBtns = document.getElementsByClassName('option');
+            let difficultyBtns = document.getElementsByClassName('diff');
+            let sizeBtns = document.getElementsByClassName('size');
+            let themeBtns = document.getElementsByClassName('theme');
 
             playBtn.addEventListener('click', () => {
                 let width = 240 * this.boardSize;
@@ -62,15 +64,33 @@ export namespace Index {
                 wrapper.style.transform = "translateX(-100%)";
             });
 
-            //this.selectDifficulty(difficultyBtns);
-        }
+            for(let i = 0; i < difficultyBtns.length; i++) {
+                difficultyBtns[i].addEventListener('click',()=>{
+                    for(let i = 0; i < difficultyBtns.length; i++)
+                        difficultyBtns[i].classList.remove('selected');
 
-        selectDifficulty(difficulty) {
-            if (difficulty.classList !== "selected") {
-                difficulty.classList.add("selected");
+                    this.selectDifficulty(parseInt(difficultyBtns[i].getAttribute('value')));
+                    difficultyBtns[i].classList.add('selected');
+                });
             }
-            //todo to gunwo pickowanie difficulty
+
+            for(let i = 0; i < sizeBtns.length; i++) {
+                sizeBtns[i].addEventListener('click',()=>{
+                    for(let i = 0; i < sizeBtns.length; i++)
+                        sizeBtns[i].classList.remove('selected');
+
+                    this.selectSize(parseInt(sizeBtns[i].getAttribute('value')));
+                    sizeBtns[i].classList.add('selected');
+                });
+            }
+        }
+        selectDifficulty(diffId: number) {
+            this.difficulty = Difficulty.values[diffId];
         }
 
+        selectSize(sizeValue: number) {
+            this.boardSize = sizeValue;
+            console.log(sizeValue);
+        }
     }
 }
