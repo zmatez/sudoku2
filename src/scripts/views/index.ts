@@ -64,9 +64,9 @@ export namespace Index {
                 wrapper.style.transform = "translateX(-100%)";
             });
 
-            for(let i = 0; i < difficultyBtns.length; i++) {
-                difficultyBtns[i].addEventListener('click',()=>{
-                    for(let i = 0; i < difficultyBtns.length; i++)
+            for (let i = 0; i < difficultyBtns.length; i++) {
+                difficultyBtns[i].addEventListener('click', () => {
+                    for (let i = 0; i < difficultyBtns.length; i++)
                         difficultyBtns[i].classList.remove('selected');
 
                     this.selectDifficulty(parseInt(difficultyBtns[i].getAttribute('value')));
@@ -74,13 +74,22 @@ export namespace Index {
                 });
             }
 
-            for(let i = 0; i < sizeBtns.length; i++) {
-                sizeBtns[i].addEventListener('click',()=>{
-                    for(let i = 0; i < sizeBtns.length; i++)
+            for (let i = 0; i < sizeBtns.length; i++) {
+                sizeBtns[i].addEventListener('click', () => {
+                    for (let i = 0; i < sizeBtns.length; i++)
                         sizeBtns[i].classList.remove('selected');
 
                     this.selectSize(parseInt(sizeBtns[i].getAttribute('value')));
                     sizeBtns[i].classList.add('selected');
+                });
+            }
+            for (let i = 0; i < themeBtns.length; i++) {
+                themeBtns[i].addEventListener('click', () => {
+                    for (let i = 0; i < themeBtns.length; i++)
+                        themeBtns[i].classList.remove('selected');
+
+                    this.selectTheme(themeBtns[i].getAttribute('value'));
+                    themeBtns[i].classList.add('selected');
                 });
             }
         }
@@ -90,7 +99,17 @@ export namespace Index {
 
         selectSize(sizeValue: number) {
             this.boardSize = sizeValue;
-            console.log(sizeValue);
+        }
+
+        selectTheme(theme: string) {
+            console.log(document.documentElement);
+            if (theme === "light") {
+                document.documentElement.classList.remove("dark");
+                document.documentElement.classList.add("light");
+            } else {
+                document.documentElement.classList.remove("light");
+                document.documentElement.classList.add("dark");
+            }
         }
     }
 }

@@ -1,0 +1,34 @@
+html.dark {
+  * {
+    --background: #17191d;
+    --accent: #5328c2;
+    --btn-background: #1f2228;
+    --title-color: #cccccc;
+    --toolbar-bg: #0f111c;
+
+    color: white;
+    .close, .minimize {
+      img {
+        filter: invert(1);
+      }
+    }
+  }
+
+  html.light {
+    * {
+      --background: #ffffff;
+      --accent: #3569cc;
+      --btn-background: #c7c7c7;
+      --toolbar-bg: #a9a9a9;
+
+      color: black;
+
+      .close, .minimize {
+        img {
+          filter: invert(0);
+        }
+      }
+    }
+  }
+}
+

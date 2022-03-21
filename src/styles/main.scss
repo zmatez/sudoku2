@@ -5,9 +5,6 @@
 @import "animation";
 
 * {
-    --background: #17191d;
-    --accent: #5328c2;
-    --btn-background: #1f2228;
     --toolbar-height: 25px;
     margin: 0;
     padding: 0;
@@ -33,15 +30,14 @@ html, body {
         min-height: var(--toolbar-height);
         max-height: var(--toolbar-height);
         overflow: hidden;
-        background: #0f111c;
+        background: var(--toolbar-bg);
         width: 100%;
-        color: white;
         display: flex;
         align-items: center;
         box-sizing: border-box;
         user-select: none;
         padding: 0;
-        z-index: 2;
+        z-index: 999;
 
         #drag {
             width: calc(100% - 100px);
@@ -62,16 +58,13 @@ html, body {
         }
 
         .close, .minimize {
-            img {
-                filter: invert(1);
-            }
-
             display: grid;
             place-items: center;
             height: var(--toolbar-height);
             box-sizing: border-box;
             min-width: 40px;
             aspect-ratio: 1;
+            z-index: 3;
         }
 
         .minimize {
