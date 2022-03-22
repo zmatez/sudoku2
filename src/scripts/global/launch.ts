@@ -8,4 +8,8 @@ export abstract class ILaunch {
     }
 
     abstract onStart(data?: any);
+
+    onThemeChange(theme: "light" | "dark"){
+
+    }
 }

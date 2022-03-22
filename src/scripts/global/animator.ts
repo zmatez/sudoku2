@@ -206,7 +206,7 @@ export namespace Animator {
     //!-----------------------------------------------------
 
     export class MainAnimation extends BackgroundAnimation {
-        private readonly background: { r: number, g: number, b: number };
+        public background: { r: number, g: number, b: number };
         private particleCount = 2000;
         private particleSize = 0.9 * 5;
         public fieldSize = 70;
@@ -299,7 +299,7 @@ export namespace Animator {
         }
 
         private drawBackground(ctx: CanvasRenderingContext2D) {
-            ctx.fillStyle = "rgba(0,0,0," + this.trailLength + ")";
+            ctx.fillStyle = "rgba(" + this.background.r + "," + this.background.g + "," + this.background.b + "," + this.trailLength + ")";
             ctx.fillRect(0, 0, this.w, this.h);
         }
 

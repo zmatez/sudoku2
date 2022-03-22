@@ -9,7 +9,7 @@ export namespace Index {
     import Difficulty = Game.Difficulty;
     import MainAnimation = Animator.MainAnimation;
 
-    export class IndexLaunch implements ILaunch {
+    export class IndexLaunch extends ILaunch {
         public readonly app: SudokuApp;
         private difficulty = Difficulty.DEFAULT;
         private boardSize = 3;
@@ -17,11 +17,13 @@ export namespace Index {
         private animation: MainAnimation;
 
         constructor(app: SudokuApp) {
-            this.app = app;
+            super(app);
         }
 
         onStart(data?) {
             this.animation = new MainAnimation(<HTMLDivElement>document.getElementById('wrapper'),{r: 0, b: 0, g: 0});
+
+
             this.animation.start()
 
             let creditsMusic = new Audio('../../music/red_sun_in_the_sky.mp3');
@@ -107,6 +109,14 @@ export namespace Index {
 
         selectSize(sizeValue: number) {
             this.boardSize = sizeValue;
+        }
+
+        onThemeChange(theme: "light" | "dark"){
+            if(this.app.theme === "dark"){
+                this.animation.background = {r: 0, b: 0, g: 0};
+            }else{
+                this.animation.background = {r: 160, b: 175, g: 160};
+            }
         }
     }
 }

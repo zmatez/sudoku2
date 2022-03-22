@@ -1,7 +1,5 @@
-$accent: #5328c2;
 $accent2: #28c29e;
-$title-border: transparentize($accent, 0.9);
-$title-background: transparentize($accent, 0.9);
+
 
 body {
     background-color: var(--background);
@@ -15,8 +13,8 @@ body {
         margin: 25px 0;
         padding: 10px 25px;
         border-radius: 5px;
-        border: 1px solid $title-border;
-        background-color: $title-background;
+        border: 1px solid var(--title-border);
+        background-color: var(--title-background);
 
         h1 {
             font-family: Raleway, sans-serif;
@@ -27,7 +25,7 @@ body {
         .timer {
             padding: 2px 6px;
             border-radius: 5px;
-            background-color: $title-border;
+            background-color: var(--title-border);
             font-size: 11px;
             display: flex;
             justify-content: center;
@@ -61,7 +59,7 @@ body {
                 font-size: 12px;
                 font-family: "Poppins", sans-serif;
                 color: white;
-                background-color: $accent;
+                background-color: var(--accent);
                 text-align: center;
                 cursor: default;
 
@@ -100,15 +98,14 @@ body {
                 box-sizing: border-box;
                 gap: 5px;
                 padding: 4px;
-                background-color: transparentize($accent, 0.95);
+                background-color: var(--t-cell-group);
 
                 .cell {
-                    color: white;
                     width: 100%;
                     aspect-ratio: 1;
                     box-sizing: border-box;
                     border-radius: 3px;
-                    background-color: transparentize(white, 0.94);
+                    background-color: var(--cell-locked-bg);
                     //transition: background-color 0.05s ease-in-out;
 
                     display: flex;
@@ -132,7 +129,7 @@ body {
                     }
 
                     &.highlight {
-                        background-color: transparentize(darken($accent,15), 0.7);
+                        background-color: var(--bg-highlight);
 
                         &.hover{
                             border-color: transparentize($accent2, 0.7);
@@ -145,11 +142,11 @@ body {
                     }
 
                     &.editable {
-                        background-color: transparentize(white, 0.9);
+                        background-color: var(--cell-editable-bg);
                         cursor: pointer;
 
                         &.highlight {
-                            background-color: transparentize($accent, 0.7);
+                            background-color: var(--t-70);
                         }
 
                         &.hover{
@@ -170,7 +167,7 @@ body {
             padding: 4px 8px;
             font-size: 12px;
             font-family: "Poppins", sans-serif;
-            background-color: transparentize($accent,0.75);
+            background-color: var(--t-75);
             text-align: center;
             user-select: none;
             cursor: pointer;
@@ -179,7 +176,7 @@ body {
             transform: scale(1);
 
             &:hover{
-                background-color: $accent;
+                background-color: var(--accent);
                 color: white;
             }
 
@@ -213,7 +210,7 @@ body {
                 font-size: 12px;
                 font-family: "Poppins", sans-serif;
                 color: white;
-                background-color: $accent;
+                background-color: var(--accent);
                 text-align: center;
                 cursor: default;
             }
@@ -260,7 +257,7 @@ body {
         background-color: transparentize(white, 0.94);
     }
     15% {
-        background-color: transparentize(lighten($accent,15), 0.2);
+        background-color: var(--cell-changed-anim);
     }
     100%{
         background-color: transparentize(white, 0.94);

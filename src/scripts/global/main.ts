@@ -33,14 +33,6 @@ export class SudokuApp {
         }
 
         this.defaults();
-
-        // default theme
-        let params = new URLSearchParams(window.location.search);
-        if(params.has("theme")){
-            this.selectTheme(params.get("theme") == "light" ? "light" : "dark");
-        } else {
-            this.selectTheme(this.theme);
-        }
     }
 
     defaults() {
@@ -52,6 +44,14 @@ export class SudokuApp {
             this.launched.onStart(new URLSearchParams(window.location.search));
         } else {
             console.error("Unable to launch controller for page: " + this.page)
+        }
+
+        // default theme
+        let params = new URLSearchParams(window.location.search);
+        if(params.has("theme")){
+            this.selectTheme(params.get("theme") == "light" ? "light" : "dark");
+        } else {
+            this.selectTheme(this.theme);
         }
     }
 
@@ -106,6 +106,10 @@ export class SudokuApp {
         } else {
             document.documentElement.classList.remove("light");
             document.documentElement.classList.add("dark");
+        }
+
+        if(this.launched){
+            this.launched.onThemeChange(theme);
         }
     }
 }
