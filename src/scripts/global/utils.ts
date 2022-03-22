@@ -7,6 +7,10 @@ export namespace Utils {
         return (Math.random() * (max - min + 1) + min);
     }
 
+    export const scaleBetween = (unscaledNum: number, minAllowed: number, maxAllowed: number, min: number, max: number) => {
+        return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
+    }
+
     export class ColorMixer{
         /**
          *

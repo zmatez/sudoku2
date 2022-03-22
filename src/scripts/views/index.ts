@@ -1,22 +1,29 @@
 import {ILaunch} from "../global/launch";
 import {SudokuApp} from "../global/main";
 import {Game} from "./game";
+import {Animator} from "../global/animator";
 
 const nwApp = nw.Window.get();
 
 export namespace Index {
     import Difficulty = Game.Difficulty;
+    import MainAnimation = Animator.MainAnimation;
 
     export class IndexLaunch implements ILaunch {
         public readonly app: SudokuApp;
         private difficulty = Difficulty.DEFAULT;
         private boardSize = 3;
 
+        private animation: MainAnimation;
+
         constructor(app: SudokuApp) {
             this.app = app;
         }
 
         onStart(data?) {
+            this.animation = new MainAnimation(<HTMLDivElement>document.getElementById('wrapper'),{r: 0, b: 0, g: 0});
+            this.animation.start()
+
             let creditsMusic = new Audio('../../music/red_sun_in_the_sky.mp3');
             let playBtn = document.getElementsByClassName('play')[0];
             let optionsBtn = document.getElementsByClassName('options')[0];
@@ -33,7 +40,7 @@ export namespace Index {
                 let width = 240 * this.boardSize;
                 let height = 205 * this.boardSize;
 
-                nw.Window.open("views/game.html?size=" + this.boardSize + "&difficulty=" + (Difficulty.values.indexOf(this.difficulty)), {
+                nw.Window.open("views/game.html?size=" + this.boardSize + "&difficulty=" + (Difficulty.values.indexOf(this.difficulty)) + "&theme=" + this.app.theme, {
                     "title": "Sudoku",
                     "icon": "images/logo.png",
                     "frame": false,
@@ -88,10 +95,11 @@ export namespace Index {
                     for (let i = 0; i < themeBtns.length; i++)
                         themeBtns[i].classList.remove('selected');
 
-                    this.selectTheme(themeBtns[i].getAttribute('value'));
+                    this.app.selectTheme(themeBtns[i].getAttribute('value') == "light" ? "light" : "dark");
                     themeBtns[i].classList.add('selected');
                 });
             }
+
         }
         selectDifficulty(diffId: number) {
             this.difficulty = Difficulty.values[diffId];
@@ -99,17 +107,6 @@ export namespace Index {
 
         selectSize(sizeValue: number) {
             this.boardSize = sizeValue;
-        }
-
-        selectTheme(theme: string) {
-            console.log(document.documentElement);
-            if (theme === "light") {
-                document.documentElement.classList.remove("dark");
-                document.documentElement.classList.add("light");
-            } else {
-                document.documentElement.classList.remove("light");
-                document.documentElement.classList.add("dark");
-            }
         }
     }
 }

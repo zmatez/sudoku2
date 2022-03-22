@@ -7,7 +7,7 @@ export namespace Game {
     import rint = Utils.rint;
     import rfloat = Utils.rfloat;
     import ColorMixer = Utils.ColorMixer;
-    import BackgroundAnimation = Animator.BackgroundAnimation;
+    import GameAnimation = Animator.GameAnimation;
 
     const win = nw.Window.get();
 
@@ -32,7 +32,7 @@ export namespace Game {
         public frozen: boolean = false;
         public won: boolean = false;
 
-        private animation: BackgroundAnimation;
+        private animation: GameAnimation;
 
         public duringSelection: Cell;
         private highlightData: { cell: Cell, x: number, y: number } = {
@@ -123,7 +123,7 @@ export namespace Game {
                     this.giveUp();
                 } else {
                     //close
-                    nw.Window.open("views/index.html", {
+                    nw.Window.open("views/index.html?theme=" + this.app.theme, {
                         "title": "Sudoku",
                         "icon": "images/logo.png",
                         "frame": false,
@@ -203,7 +203,7 @@ export namespace Game {
                 this.animation.stop()
             }
 
-            this.animation = new BackgroundAnimation(this.parent);
+            this.animation = new GameAnimation(() => this.won,this.parent);
             this.animation.start();
 
             this.onChange();
@@ -233,7 +233,7 @@ export namespace Game {
             }
 
             if(this.animation){
-                this.animation = this.animation.restart();
+                this.animation = <GameAnimation>this.animation.restart();
             }
         }
 
@@ -958,19 +958,17 @@ export namespace Game {
                         y: length * upscale
                     }
 
-                    const fillWedge = (cx, cy, radius, startAngle, endAngle, fillcolor, stroke = false) => {
+                    const fillWedge = (cx, cy, radius, startAngle, endAngle, fillcolor) => {
+                        ctx.save();
+                        //ctx.globalCompositeOperation = "source-in";
                         ctx.beginPath();
                         ctx.moveTo(cx, cy);
                         ctx.arc(cx, cy, radius, startAngle, endAngle);
                         ctx.closePath();
-                        if(stroke){
-                            ctx.lineWidth = 1;
-                            ctx.strokeStyle = fillcolor;
-                            ctx.stroke();
-                        } else {
-                            ctx.fillStyle = fillcolor;
-                            ctx.fill();
-                        }
+
+                        ctx.fillStyle = fillcolor;
+                        ctx.fill();
+                        ctx.restore()
                     }
 
                     const degToAngle = (deg) => {
@@ -979,20 +977,21 @@ export namespace Game {
                         return(start+fullCircle*(deg/360));
                     }
 
+
                     ctx.save();
                     ctx.imageSmoothingEnabled = false;
-                    ctx.globalCompositeOperation = "source-out";
                     {
                         //lower circle
                         let cx = center.x;
                         let cy = center.y;
                         let radius = length * upscale / 3;
-                        let startAngle = -((deg + 1) / 2) % 360;
-                        let endAngle = ((deg + 1) / 2) % 360;
+                        let startAngle = -(deg / 2) % 360;
+                        let endAngle = (deg / 2) % 360;
 
                         fillWedge(cx, cy, radius, degToAngle(startAngle), degToAngle(endAngle), ctx.fillStyle);
                     }
-                    ctx.globalAlpha = 0.8;
+                    ctx.globalCompositeOperation = "source-out";
+                    //ctx.globalAlpha = 0.8;
                     {
                         //upper circle
                         let cx = center.x;
@@ -1009,7 +1008,7 @@ export namespace Game {
                         ctx.save();
                         ctx.translate(length * upscale, length / 3 * upscale);
                         ctx.rotate(-(i / total * 360) / 180 * Math.PI);
-                        ctx.font = "600 " + ((this.cell.fontSize) * upscale) + 'px Poppins';
+                        ctx.font = "600 " + ((this.cell.fontSize - 2) * upscale) + 'px Poppins';
                         ctx.textAlign = "center";
                         ctx.fillStyle = "white";
                         ctx.fillText((i) + "", 0, 5 * upscale);

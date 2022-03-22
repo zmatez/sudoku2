@@ -1,34 +1,39 @@
 html.dark {
-  * {
-    --background: #17191d;
-    --accent: #5328c2;
-    --btn-background: #1f2228;
-    --title-color: #cccccc;
-    --toolbar-bg: #0f111c;
-
-    color: white;
-    .close, .minimize {
-      img {
-        filter: invert(1);
-      }
-    }
-  }
-
-  html.light {
     * {
-      --background: #ffffff;
-      --accent: #3569cc;
-      --btn-background: #c7c7c7;
-      --toolbar-bg: #a9a9a9;
+        --background: #17191d;
+        --foreground: #ffffff;
+        --accent: #5328c2;
+        --btn-background: #1f2228;
+        --btn-background-hover: lighten(#1f2228,6);
+        --title-color: #cccccc;
+        --toolbar-bg: #0f111c;
 
-      color: black;
+        color: var(--foreground);
 
-      .close, .minimize {
-        img {
-          filter: invert(0);
+        .close, .minimize {
+            img {
+                filter: invert(1);
+            }
         }
-      }
     }
-  }
+
+    html.light {
+        * {
+            --background: #ffffff;
+            --foreground: #000000;
+            --accent: #3569cc;
+            --btn-background: #c7c7c7;
+            --btn-background-hover: darken(#c7c7c7,6);
+            --toolbar-bg: #a9a9a9;
+
+            color: var(--foreground);
+
+            .close, .minimize {
+                img {
+                    filter: invert(0);
+                }
+            }
+        }
+    }
 }
 

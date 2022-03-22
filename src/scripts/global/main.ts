@@ -12,7 +12,7 @@ export class SudokuApp {
     private readonly devMode: boolean = true;
     private readonly page: string;
     private readonly launched: ILaunch;
-    private theme: "LIGHT" | "DARK" = "DARK";
+    public theme: "light" | "dark" = "dark";
 
     constructor() {
         if (this.devMode) {
@@ -33,6 +33,14 @@ export class SudokuApp {
         }
 
         this.defaults();
+
+        // default theme
+        let params = new URLSearchParams(window.location.search);
+        if(params.has("theme")){
+            this.selectTheme(params.get("theme") == "light" ? "light" : "dark");
+        } else {
+            this.selectTheme(this.theme);
+        }
     }
 
     defaults() {
@@ -90,8 +98,15 @@ export class SudokuApp {
         document.body.append(wrapper);
     }
 
-    applyTheme(){
-
+    selectTheme(theme: "light" | "dark") {
+        this.theme = theme;
+        if (theme === "light") {
+            document.documentElement.classList.remove("dark");
+            document.documentElement.classList.add("light");
+        } else {
+            document.documentElement.classList.remove("light");
+            document.documentElement.classList.add("dark");
+        }
     }
 }
 

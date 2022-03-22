@@ -41,7 +41,6 @@ body {
         align-items: center;
         width: 100%;
         height: 100%;
-        padding: 30px;
         overflow: hidden;
 
         .header {
@@ -51,8 +50,10 @@ body {
             position: relative;
             width: calc(100% - 10px);
             padding: 4px 6px;
+            margin-top: 26px;
             margin-bottom: 10px;
             gap: 6px;
+            z-index: 2;
 
             .status-display {
                 border-radius: 4px;
@@ -89,6 +90,8 @@ body {
             aspect-ratio: 1;
             box-sizing: border-box;
             gap: 12px;
+            z-index: 2;
+            position: relative;
 
             .cell-group {
                 display: grid;
@@ -278,6 +281,7 @@ body {
 
 .cell-popup {
     position: fixed;
+    z-index: 100;
     border-radius: 50%;
 
     .value {
