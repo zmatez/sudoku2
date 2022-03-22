@@ -208,14 +208,14 @@ export namespace Animator {
     export class MainAnimation extends BackgroundAnimation {
         public background: { r: number, g: number, b: number };
         private particleCount = 2000;
-        private particleSize = 0.9 * 5;
+        private particleSize = 1.3;
         public fieldSize = 70;
         private fieldForce = 0.15;
         private noiseSpeed = 0.003;
         private trailLength = 0.15;
         private hueBase = 250;
-        private hueRange = 25;
-        public maxSpeed = .5;
+        private hueRange = 12;
+        public maxSpeed = 2;
 
         public columns = 0;
         public rows = 0;

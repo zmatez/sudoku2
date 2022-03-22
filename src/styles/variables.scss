@@ -6,10 +6,16 @@ html.dark {
         --foreground: #ffffff;
         --accent: #5328c2;
         --btn-background: #1f2228;
-        --btn-background-hover: lighten(#1f2228, 6);
+        --btn-color: #ffffff;
+        --btn-background-hover: #{lighten(#1f2228, 6)};
         --title-color: #cccccc;
+        --options-title-color: #cccccc;
         --toolbar-bg: #0f111c;
+        --social-credit-shadow: #{transparentize(white,0.5)};
+        --credit-background: #{transparentize($accent-d,0.4)};
 
+        --cell-locked-bg: #{transparentize(white,0.94)};
+        --cell-editable-bg: #{transparentize(white,0.9)};
 
         --title-border: #{transparentize($accent-d,0.9)};
         --title-background: #{transparentize($accent-d,0.9)};
@@ -17,11 +23,11 @@ html.dark {
         --t-cell-group: #{transparentize($accent-d, 0.95)};
         --t-70: #{transparentize($accent-d, 0.7)};
         --t-75: #{transparentize($accent-d, 0.75)};
-        --cell-changed-anim: transparentize(lighten($accent-d,15), 0.2);
+        --cell-changed-anim: #{transparentize(lighten($accent-d,15), 0.2)};
 
         color: var(--foreground);
 
-        .close, .minimize {
+        .close, .minimize, .maximize {
             img {
                 filter: invert(1);
             }
@@ -35,21 +41,25 @@ html.light{
         --background: #ffffff;
         --foreground: #000000;
         --title-color: #696969;
+        --options-title-color: #cccccc;
         --accent: #426edf;
         --btn-background: #ececec;
-        --btn-background-hover: darken(#a2a2a2,6);
+        --btn-background-hover: #{darken(#a2a2a2,6)};
+        --btn-color: #ffffff;
         --toolbar-bg: #e3e3e3;
+        --social-credit-shadow: #{transparentize(black,0.5)};
+        --credit-background: #{transparentize($accent-l,0.4)};
 
-        --cell-locked-bg: rgba(230,230,230,0.9);
-        --cell-editable-bg: rgba(240,240,240,0.9);
+        --cell-locked-bg: rgba(225,225,225,0.9);
+        --cell-editable-bg: rgba(237,237,237,0.9);
 
         --title-border: #{transparentize($accent-l,0.9)};
         --title-background: #{transparentize($accent-l,0.9)};
-        --bg-highlight: #{transparentize(darken($accent-l,20), 0.7)};
+        --bg-highlight: #{transparentize(darken($accent-l,10), 0.7)};
         --t-cell-group: #{transparentize($accent-l, 0.95)};
-        --t-70: #{transparentize($accent-l, 0.7)};
+        --t-70: #{transparentize($accent-l, 0.85)};
         --t-75: #{transparentize($accent-l, 0.75)};
-        --cell-changed-anim: transparentize(lighten($accent-l,15), 0.2);
+        --cell-changed-anim: #{transparentize(lighten($accent-l,15), 0.2)};
 
         color: var(--foreground);
 
@@ -62,8 +72,7 @@ html.light{
         background:  rgba(0,0,0,0.2);
     }
 
-    img:not(.logo, .icon,.socialcredit1000){
+    img:not(.logo, .icon, .socialcredit1000, .toolbar-img){
         filter: invert(1);
     }
 }
-

@@ -24,5 +24,6 @@ module.exports = {
     mode: 'production',
     plugins: [
         new ForkTsCheckerWebpackPlugin(), // run TSC on a separate thread
-    ]
+    ],
+    target: "node"
 };

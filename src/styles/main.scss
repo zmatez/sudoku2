@@ -53,11 +53,11 @@ html, body {
         }
 
         .icon {
-            max-height: 70%;
-            margin: 10px;
+            margin: 6px;
+            width: 18px;
         }
 
-        .close, .minimize {
+        .close, .minimize, .maximize {
             display: grid;
             place-items: center;
             height: var(--toolbar-height);
@@ -78,8 +78,19 @@ html, body {
             &:hover {
                 background: rgba(100, 100, 100, 0.47);
                 transition: all 0.1s ease-out;
+            }
+        }
 
+        .maximize {
+            transition: all 0.1s ease-out;
 
+            img {
+                max-height: 65%;
+            }
+
+            &:hover {
+                background: rgba(100, 100, 100, 0.47);
+                transition: all 0.1s ease-out;
             }
         }
 

@@ -2,22 +2,24 @@ import {Game} from "../views/game";
 import GameLaunch = Game.GameLaunch;
 import {Index} from "../views";
 import IndexLaunch = Index.IndexLaunch;
-import Difficulty = Game.Difficulty;
 import {ILaunch} from "./launch";
+import {Data} from "./data";
+import DataLoader = Data.DataLoader;
 
 const nwApp = nw.Window.get();
-nw.Window.get().showDevTools();
+//nw.Window.get().showDevTools();
 
 export class SudokuApp {
-    private readonly devMode: boolean = true;
     private readonly page: string;
     private readonly launched: ILaunch;
     public theme: "light" | "dark" = "dark";
+    public data: DataLoader;
+
+    private maximized: boolean = false;
 
     constructor() {
-        if (this.devMode) {
-
-        }
+        this.data = new Data.DataLoader();
+        this.data.load();
 
         this.page = document.currentScript.getAttribute("page");
 
@@ -32,11 +34,13 @@ export class SudokuApp {
             }
         }
 
+        this.theme = this.data.getValue("theme", this.theme);
+
         this.defaults();
     }
 
     defaults() {
-        this.createToolbar();
+        this.createToolbar(this.page == "game");
     }
 
     onStart() {
@@ -46,16 +50,10 @@ export class SudokuApp {
             console.error("Unable to launch controller for page: " + this.page)
         }
 
-        // default theme
-        let params = new URLSearchParams(window.location.search);
-        if(params.has("theme")){
-            this.selectTheme(params.get("theme") == "light" ? "light" : "dark");
-        } else {
-            this.selectTheme(this.theme);
-        }
+        this.selectTheme(this.theme);
     }
 
-    createToolbar() {
+    createToolbar(canMaximize: boolean = false) {
         let wrapper = document.createElement("div");
         wrapper.classList.add('toolbar');
 
@@ -66,7 +64,7 @@ export class SudokuApp {
 
         let title = document.createElement("div");
         title.id = "title";
-        title.innerText = 'Sudoku';
+        title.innerText = 'Sudoku Breakout';
         wrapper.appendChild(title);
 
         let minimize = document.createElement("div");
@@ -75,10 +73,31 @@ export class SudokuApp {
 
         let minimizeSvg = document.createElement('img');
         minimizeSvg.src = "../images/minimize.svg";
+        minimizeSvg.classList.add("toolbar-img")
         minimize.appendChild(minimizeSvg);
         minimizeSvg.addEventListener('click', () => {
             nwApp.minimize();
         });
+
+        if(canMaximize){
+            let maximize = document.createElement("div");
+            maximize.classList.add("maximize");
+            wrapper.appendChild(maximize);
+
+            let maximizeSvg = document.createElement('img');
+            maximizeSvg.src = "../images/maximize.svg";
+            maximizeSvg.classList.add("toolbar-img")
+            maximize.appendChild(maximizeSvg);
+            maximizeSvg.addEventListener('click', () => {
+                this.maximized = !this.maximized;
+
+                if(!this.maximized){
+                    nwApp.restore()
+                } else {
+                    nwApp.maximize()
+                }
+            });
+        }
 
         let close = document.createElement("div");
         close.classList.add('close');
@@ -88,6 +107,7 @@ export class SudokuApp {
         });
 
         let closeSvg = document.createElement('img');
+        closeSvg.classList.add("toolbar-img")
         closeSvg.src = "../images/close.svg";
         close.appendChild(closeSvg);
 
@@ -110,6 +130,12 @@ export class SudokuApp {
 
         if(this.launched){
             this.launched.onThemeChange(theme);
+        }
+
+        //@ts-ignore
+        if(this.data.getValue("theme","") != this.theme) {
+            this.data.setValue("theme", this.theme);
+            this.data.save();
         }
     }
 }

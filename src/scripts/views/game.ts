@@ -56,9 +56,9 @@ export namespace Game {
 
             //data
 
-            this.size = parseInt(data.get("size"));
-            this.difficulty = Difficulty.values[parseInt(data.get("difficulty"))];
-            if(!this.difficulty.fieldsMatchOnce) {
+            this.size = this.app.data.getValue("size", 3);
+            this.difficulty = Difficulty.values[this.app.data.getValue("difficulty", 0)];
+            if (!this.difficulty.fieldsMatchOnce) {
                 this.emptyCount = (this.size * this.size * this.size * this.size) - rfloat(this.difficulty.minFill, this.difficulty.maxFill) / 100 * (this.size * this.size * this.size * this.size);
             }
             this.cellSize = (Math.min(document.body.offsetWidth, document.body.offsetHeight) * 0.8) / (this.size * this.size);
@@ -123,8 +123,8 @@ export namespace Game {
                     this.giveUp();
                 } else {
                     //close
-                    nw.Window.open("views/index.html?theme=" + this.app.theme, {
-                        "title": "Sudoku",
+                    nw.Window.open("views/index.html", {
+                        "title": "Sudoku Breakout",
                         "icon": "images/logo.png",
                         "frame": false,
                         "width": 500,
@@ -180,10 +180,10 @@ export namespace Game {
             }
 
             let generated = false;
-            while(!generated){
+            while (!generated) {
                 try {
                     this.fillBoard();
-                }catch (e){
+                } catch (e) {
                     continue
                 }
                 generated = true;
@@ -199,11 +199,11 @@ export namespace Game {
             this.parent.appendChild(this.board);
             this.parent.appendChild(this.button);
 
-            if(this.animation){
+            if (this.animation) {
                 this.animation.stop()
             }
 
-            this.animation = new GameAnimation(() => this.won,this.parent);
+            this.animation = new GameAnimation(() => this.won, this.parent);
             this.animation.start();
 
             this.onChange();
@@ -232,7 +232,7 @@ export namespace Game {
                 }
             }
 
-            if(this.animation){
+            if (this.animation) {
                 this.animation = <GameAnimation>this.animation.restart();
             }
         }
@@ -883,7 +883,7 @@ export namespace Game {
 
                                 let dist = Math.sqrt(Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2));
                                 if (min.element == null || min.dist > dist) {
-                                    if(dist < max) {
+                                    if (dist < max) {
                                         min = {
                                             dist: dist,
                                             element: element
@@ -907,7 +907,6 @@ export namespace Game {
                 }
 
                 let length = elSize / 2;
-                let deg = 360 / total;
 
                 let upscale = 2;
 
@@ -930,17 +929,33 @@ export namespace Game {
                     let colorR = 37;
                     let colorG = 41;
                     let colorB = 56;
+                    let color = "#252938"
+
+                    let colorHover = "#1f3d79";
+                    let colorSelected = "#5328c2";
+
+                    let fontColor = "white";
+
+                    if (this.cell.group.parent.app.theme == "light") {
+                        colorR = 225;
+                        colorG = 225;
+                        colorB = 255;
+                        color = "#E1E1FF";
+                        colorSelected = "#6689e3";
+                        colorHover = "#B0F0DE";
+                        fontColor = "black";
+                    }
 
                     if (val.classList.contains("reselected") || val.classList.contains("selected")) {
                         if (tick >= 200) {
-                            let mix = ColorMixer.mixRgb("#252938", val.classList.contains("reselected") ? "#1f3d79" : "#5328c2", Math.min(tick - 200, 150) / 150);
+                            let mix = ColorMixer.mixRgb("#252938", val.classList.contains("reselected") ? colorHover : colorSelected, Math.min(tick - 200, 150) / 150);
                             colorR = mix.r;
                             colorG = mix.g;
                             colorB = mix.b;
                         }
 
                         if (hideTick > 0) {
-                            let mix = ColorMixer.mixRgb(ColorMixer.rgbToHex(colorR, colorG, colorB), "#252938", Math.min(hideTick, 150) / 150);
+                            let mix = ColorMixer.mixRgb(ColorMixer.rgbToHex(colorR, colorG, colorB), color, Math.min(hideTick, 150) / 150);
                             colorR = mix.r;
                             colorG = mix.g;
                             colorB = mix.b;
@@ -958,6 +973,26 @@ export namespace Game {
                         y: length * upscale
                     }
 
+                    ctx.save();
+                    ctx.imageSmoothingEnabled = false;
+
+                    const theta = Math.PI / ((total - 0.2) / 2);
+
+                    const trace = (cx, cy, r1, r2, t) => {
+                        ctx.moveTo(cx + r2, cy);
+                        ctx.lineTo(cx + r1, cy);
+                        ctx.arc(cx, cy, r1, 0, t);
+                        ctx.arc(cx, cy, r2, t, 0, true);
+                    };
+                    ctx.translate(center.x, center.y);
+                    ctx.rotate(-Math.PI / 2 - theta + ((360 / total) / 180 * Math.PI) / 2);
+                    ctx.beginPath();
+                    trace(0, 0, length * upscale / 3, length * upscale, theta);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.restore();
+                    /*
                     const fillWedge = (cx, cy, radius, startAngle, endAngle, fillcolor) => {
                         ctx.save();
                         //ctx.globalCompositeOperation = "source-in";
@@ -972,9 +1007,9 @@ export namespace Game {
                     }
 
                     const degToAngle = (deg) => {
-                        let start=-Math.PI/2;
-                        let fullCircle=Math.PI*2;
-                        return(start+fullCircle*(deg/360));
+                        let start = -Math.PI / 2;
+                        let fullCircle = Math.PI * 2;
+                        return (start + fullCircle * (deg / 360));
                     }
 
 
@@ -1003,15 +1038,17 @@ export namespace Game {
                         fillWedge(cx, cy, radius, degToAngle(startAngle), degToAngle(endAngle), ctx.fillStyle);
                     }
                     ctx.restore();
+                     */
 
                     if (i != 0) {
                         ctx.save();
                         ctx.translate(length * upscale, length / 3 * upscale);
                         ctx.rotate(-(i / total * 360) / 180 * Math.PI);
-                        ctx.font = "600 " + ((this.cell.fontSize - 2) * upscale) + 'px Poppins';
+                        let fontSize = ((this.cell.fontSize - 2) * upscale);
+                        ctx.font = "600 " + fontSize + 'px Poppins';
                         ctx.textAlign = "center";
-                        ctx.fillStyle = "white";
-                        ctx.fillText((i) + "", 0, 5 * upscale);
+                        ctx.fillStyle = fontColor;
+                        ctx.fillText((i) + "", 0, fontSize / 3);
                         ctx.restore()
                     }
                 })
@@ -1117,7 +1154,7 @@ export namespace Game {
     }
 
     export class Difficulty {
-        public static DEFAULT: Difficulty = new Difficulty("default", 0, 0, "#3745cb").makeFieldsMatchOnce();
+        public static DEFAULT: Difficulty = new Difficulty("one-match", 0, 0, "#3745cb").makeFieldsMatchOnce();
         public static EASY: Difficulty = new Difficulty("easy", 40, 60, "#37cb77");
         public static MEDIUM: Difficulty = new Difficulty("medium", 20, 40, "#de7225");
         public static HARD: Difficulty = new Difficulty("hard", 10, 20, "#cb374d");

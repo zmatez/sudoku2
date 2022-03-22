@@ -13,13 +13,15 @@ body {
     text-align: center;
     flex-wrap: wrap;
 
+    h2{
+        margin-bottom: 20px;
+    }
+
     .header {
         flex-basis: 100%;
 
         img {
             margin: 10px 0;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
             width: 96px;
             height: 96px;
         }
@@ -57,6 +59,10 @@ body {
         .highlight {
             background: var(--accent);
             color: white;
+
+            &:hover{
+                color: white;
+            }
         }
     }
 
@@ -84,6 +90,7 @@ body {
             border-radius: 5px;
             font-size: 12px;
             padding: 6px 10px;
+            color: var(--btn-color)
         }
 
         #left {
@@ -140,6 +147,7 @@ body {
                 box-sizing: border-box;
                 transition: all 0.15s ease-in;
                 cursor: pointer;
+                font-size: 13px;
 
                 &:hover{
                     color: var(--foreground);
@@ -171,7 +179,7 @@ body {
                 &.selected {
                     background: var(--accent);
                     cursor: default;
-                    color: var(--foreground);
+                    color: var(--btn-color);
 
                     &:hover{
                         background: var(--accent);
@@ -183,8 +191,11 @@ body {
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                color: var(--title-color);
+                color: var(--options-title-color);
                 margin: 10px 10%;
+                font-family: "Raleway", sans-serif;
+                font-weight: 600;
+                letter-spacing: 0.6px;
 
                 img {
                     margin: 0 10px;
@@ -205,7 +216,15 @@ body {
 
                 ul {
                     list-style: none;
-                    font-size: 16px;
+
+                    li {
+                        font-size: 13px;
+                        padding: 4px 15px;
+                        border-radius: 4px;
+                        background-color: var(--credit-background);
+                        margin-bottom: 6px;
+                        color: var(--btn-color)
+                    }
                 }
             }
 
@@ -214,6 +233,7 @@ body {
                 max-width: 40%;
                 -webkit-user-drag: none;
                 user-drag: none;
+                filter: drop-shadow(0 0 7px var(--social-credit-shadow));
             }
         }
     }
